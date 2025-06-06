@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy()  # wir initialisieren es später in app.py
+db = SQLAlchemy()
 
 class Pipeline(db.Model):
     __tablename__ = 'pipeline'
@@ -12,6 +12,3 @@ class Pipeline(db.Model):
     status_text = db.Column(db.String(256), nullable=True)
     video_path = db.Column(db.String(256), nullable=True)
     youtube_url = db.Column(db.String(256), nullable=True)
-
-    def __repr__(self):
-        return f"<Pipeline {self.id} – {self.name}>"
