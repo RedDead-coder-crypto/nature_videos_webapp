@@ -1,29 +1,31 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8" />
-    <title>Vorhandene Pipelines</title>
+    <meta charset="utf-8">
+    <title>Übersicht der Pipelines</title>
 </head>
 <body>
-    <h1>Vorhandene Pipelines</h1>
+    <h1>Pipeline-Übersicht</h1>
 
-    <ul>
-        {% for pip in pipelines %}
-            <li>
-                <a href="{{ url_for('main.show_pipeline', pipe_id=pip.id) }}">
-                    {{ pip.name }} (Status: {{ pip.status_text }})
-                </a>
-            </li>
-        {% else %}
-            <li>Keine Pipelines vorhanden.</li>
-        {% endfor %}
-    </ul>
-
-    <hr>
-    <h2>Neue Pipeline anlegen</h2>
-    <form method="post" action="{{ url_for('main.index') }}">
+    <!-- Formular, um eine neue Pipeline anzulegen -->
+    <form action="{{ url_for('main.create_pipeline') }}" method="post">
         <input type="text" name="name" placeholder="Name der Pipeline" required>
         <button type="submit">Erstellen</button>
     </form>
+
+    <hr>
+
+    <!-- Liste aller bestehenden Pipelines -->
+    <ul>
+    {% for pip in pipelines %}
+        <li>
+            <strong>{{ pip.name }}</strong> – Status: {{ pip.status_text }}
+            <!-- Link zur Detailseite -->
+            <a href="{{ url_for('main.show_pipeline', pipe_id=pip.id) }}">Details</a>
+        </li>
+    {% else %}
+        <li>Keine Pipelines vorhanden.</li>
+    {% endfor %}
+    </ul>
 </body>
 </html>
