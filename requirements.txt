@@ -8,3 +8,6 @@ ffmpeg-python==0.2.0
 python-dotenv==0.21.0
 gunicorn==20.1.0
 werkzeug==2.2.3
+
+# Füge folgende Zeile hinzu:
+SQLAlchemy==1.4.49
