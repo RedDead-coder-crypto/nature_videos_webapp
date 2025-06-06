@@ -8,13 +8,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Damit SQLAlchemy die Modelle kennt
+# Importiere das Modell, damit SQLAlchemy weiß, welche Tabellen es anlegen soll
 from models import Pipeline
 
-# Registriere unsere Routen (Blueprint)
+# Registriere den Blueprint für alle Routen
 app.register_blueprint(main)
 
-# ERSTELLE DB im Startkontext (wenn init-db nicht explizit aufgerufen wird, sorgt das für Sicherheit)
+# Lege beim Start alle noch fehlenden Tabellen an
 with app.app_context():
     db.create_all()
 
