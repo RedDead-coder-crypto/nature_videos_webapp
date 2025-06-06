@@ -1,23 +1,22 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pipeline {{ pipeline.id }}</title>
+</head>
+<body>
+    <h1>{{ pipeline.name }}</h1>
 
-{% block content %}
-  <h2>Pipeline: {{ pipeline.name }}</h2>
-  <ul>
-    <li><strong>ID:</strong> {{ pipeline.id }}</li>
-    <li><strong>Typ:</strong> {{ pipeline.type }}</li>
-    <li><strong>Cron-Schedule:</strong> {{ pipeline.schedule }}</li>
-    <li><strong>Aktiv:</strong> {{ 'Ja' if pipeline.active else 'Nein' }}</li>
-    <li><strong>Erstellt am:</strong> {{ pipeline.created_at }}</li>
-    <li><strong>Letzter Lauf:</strong> {{ pipeline.last_run or '–' }}</li>
-    <li><strong>Einstellungen (JSON):</strong><pre>{{ pipeline.settings }}</pre></li>
-  </ul>
-  <form action="{{ url_for('trigger_pipeline', pipe_id=pipeline.id) }}" method="post">
-    <button type="submit">Jetzt manuell ausführen</button>
-  </form>
-  <br>
-  <a href="{{ url_for('edit_pipeline', pipe_id=pipeline.id) }}">Bearbeiten</a> |
-  <form action="{{ url_for('remove_pipeline', pipe_id=pipeline.id) }}" method="post" style="display:inline;">
-    <button type="submit" onclick="return confirm('Wirklich löschen?');">Löschen</button>
-  </form> |
-  <a href="{{ url_for('index') }}">Zurück</a>
-{% endblock %}
+    <p><strong>Status:</strong> {{ pipeline.status_text }}</p>
+    {% if pipeline.started_at %}
+        <p><strong>Seit:</strong> {{ (datetime.utcnow() - pipeline.started_at).seconds }} Sekunden</p>
+    {% endif %}
+
+    {% if pipeline.youtube_url %}
+        <p><a href="{{ pipeline.youtube_url }}" target="_blank">📺 Video auf YouTube ansehen</a></p>
+    {% endif %}
+
+    <form action="{{ url_for('run_pipeline', pipeline_id=pipeline.id) }}" method="post">
+        <button type="submit">🚀 Starten</button>
+    </form>
+</body>
+</html>
