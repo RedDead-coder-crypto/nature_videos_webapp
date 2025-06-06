@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  {% if pipeline %}
+    <h2>Pipeline bearbeiten</h2>
+    <form action="{{ url_for('edit_pipeline', pipe_id=pipeline.id) }}" method="post">
+  {% else %}
+    <h2>Neue Pipeline erstellen</h2>
+    <form action="{{ url_for('new_pipeline') }}" method="post">
+  {% endif %}
+      <label for="name">Name:</label><br>
+      <input type="text" id="name" name="name" value="{{ pipeline.name if pipeline else '' }}" required><br><br>
+
+      <label for="type">Typ (z.B. nature):</label><br>
+      <input type="text" id="type" name="type" value="{{ pipeline.type if pipeline else '' }}" required><br><br>
+
+      <label for="schedule">Cron-Expression (Minute Stunde Tag Monat Wochentag):</label><br>
+      <input type="text" id="schedule" name="schedule" value="{{ pipeline.schedule if pipeline else '' }}" placeholder="z.B. 0 2 * * *" required><br><br>
+
+      <label for="settings">Einstellungen (JSON-Format):</label><br>
+      <textarea id="settings" name="settings" rows="5" cols="50">{{ pipeline.settings if pipeline else '' }}</textarea><br><br>
+
+      {% if pipeline %}
+        <label><input type="checkbox" name="active" {% if pipeline.active %}checked{% endif %}> aktiv</label><br><br>
+        <button type="submit">Speichern</button>
+      {% else %}
+        <button type="submit">Erstellen</button>
+      {% endif %}
+    </form>
+{% endblock %}
