@@ -10,3 +10,6 @@ class Pipeline(db.Model):
     youtube_url = db.Column(db.String(200))
     status_text = db.Column(db.String(255), default="Wartend")
     started_at = db.Column(db.DateTime, nullable=True, default=None)
+
+    def __repr__(self):
+        return f"<Pipeline {self.id} – {self.name}>"
