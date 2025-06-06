@@ -1,36 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-  <meta charset="utf-8">
-  <title>Pipelines</title>
+    <meta charset="UTF-8" />
+    <title>Vorhandene Pipelines</title>
 </head>
 <body>
-  <h1>Vorhandene Pipelines</h1>
+    <h1>Vorhandene Pipelines</h1>
 
-  {% if pipelines %}
     <ul>
-      {% for pipeline in pipelines %}
-        <li>
-          <strong>{{ pipeline.name }}</strong> – {{ pipeline.status_text or 'N/A' }}
-          <!-- Hier muss das Formular mit POST an run_pipeline stehen: -->
-          <form action="{{ url_for('main.run_pipeline', pipeline_id=pipeline.id) }}"
-                method="post"
-                style="display:inline">
-            <button type="submit">▶️ Ausführen</button>
-          </form>
-        </li>
-      {% endfor %}
+        {% for pip in pipelines %}
+            <li>
+                <a href="{{ url_for('main.show_pipeline', pipe_id=pip.id) }}">
+                    {{ pip.name }} (Status: {{ pip.status_text }})
+                </a>
+            </li>
+        {% else %}
+            <li>Keine Pipelines vorhanden.</li>
+        {% endfor %}
     </ul>
-  {% else %}
-    <p>Keine Pipelines vorhanden.</p>
-  {% endif %}
 
-  <hr>
-
-  <h2>Neue Pipeline erstellen</h2>
-  <form action="{{ url_for('main.create') }}" method="post">
-    <input type="text" name="name" placeholder="Name der Pipeline" required>
-    <button type="submit">Erstellen</button>
-  </form>
+    <hr>
+    <h2>Neue Pipeline anlegen</h2>
+    <form method="post" action="{{ url_for('main.index') }}">
+        <input type="text" name="name" placeholder="Name der Pipeline" required>
+        <button type="submit">Erstellen</button>
+    </form>
 </body>
 </html>
