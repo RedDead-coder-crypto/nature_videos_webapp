@@ -10,8 +10,8 @@ class Pipeline(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), nullable=False)
-    type = db.Column(db.String(64), nullable=False)    
-    schedule = db.Column(db.String(64), nullable=False)  # Cron-Expression, z.B. '0 2 * * *'
+    type = db.Column(db.String(64), nullable=False)
+    schedule = db.Column(db.String(64), nullable=False)  # Cron-Expression
     active = db.Column(db.Boolean, default=True)
     settings = db.Column(db.Text, nullable=True)         # JSON-String für weitere Optionen
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
