@@ -1,43 +1,62 @@
 import os
-from moviepy.editor import VideoFileClip, AudioFileClip
+from moviepy.editor import VideoFileClip, AudioFileClip, concatenate_videoclips
+from models import db, Pipeline
 
-def generate_nature_video(pipeline_id):
+# Standard-Ordnernamen (passen Sie diese Pfade an, falls Ihr Ordner anders heißt)
+AUDIO_DIR = os.path.join(os.path.dirname(__file__), 'media', 'audio')
+VIDEO_DIR = os.path.join(os.path.dirname(__file__), 'media', 'video')
+OUTPUT_DIR = os.path.join(os.path.dirname(__file__), 'output_videos')
+
+if not os.path.exists(OUTPUT_DIR):
+    os.makedirs(OUTPUT_DIR)
+
+def generate_nature_video(pipeline_id: int):
     """
-    Kombiniert media/video/sample.mp4 mit media/audio/sample.mp3
-    und speichert das Ergebnis unter media/output_<pipeline_id>.mp4.
-    Gibt den Pfad zur neuen Datei zurück oder None bei Fehler.
+    1. Holt sich Pipeline aus der DB.
+    2. Sucht sich alle Audio‐Dateien im AUDIO_DIR.
+    3. Sucht sich Videoclips im VIDEO_DIR.
+    4. Macht ein einfaches Zusammensetzen (z. B. erst alle Videos, dann Audio drüber).
+    5. Speichert das Ergebnis unter output_videos/<pipeline_id>.mp4
+    6. Aktualisiert Pipeline.status_text und video_path in der DB.
     """
-    # Ordner- und Dateinamen festlegen
-    base_dir = os.getcwd()
-    audio_dir = os.path.join(base_dir, 'media', 'audio')
-    video_dir = os.path.join(base_dir, 'media', 'video')
-    output_dir = os.path.join(base_dir, 'media')
+    pip = Pipeline.query.get(pipeline_id)
+    if pip is None:
+        return
 
-    audio_file = os.path.join(audio_dir, 'sample.mp3')
-    video_file = os.path.join(video_dir, 'sample.mp4')
-    output_file = os.path.join(output_dir, f'output_{pipeline_id}.mp4')
+    pip.started_at = datetime.utcnow()
+    db.session.commit()
 
-    # Überprüfen, ob die Quelldateien existieren
-    if not os.path.exists(audio_file) or not os.path.exists(video_file):
-        print(f"[WARN] Fehlende Quelldateien: {audio_file} oder {video_file}")
-        return None
+    # 1. Audiodateien sammeln
+    audios = []
+    for filename in os.listdir(AUDIO_DIR):
+        if filename.lower().endswith((".mp3", ".wav")):
+            audios.append(os.path.join(AUDIO_DIR, filename))
 
-    try:
-        # Video-Clip laden (wir nehmen die komplette Länge)
-        video_clip = VideoFileClip(video_file)
+    # 2. Videoclips sammeln
+    videos = []
+    for filename in os.listdir(VIDEO_DIR):
+        if filename.lower().endswith((".mp4", ".mov", ".avi")):
+            videos.append(os.path.join(VIDEO_DIR, filename))
 
-        # Audio-Clip laden und auf die Länge des Videos trimmen
-        audio_clip = AudioFileClip(audio_file).subclip(0, min(video_clip.duration, AudioFileClip(audio_file).duration))
+    if not audios or not videos:
+        # Kein Audio oder keine Videos = Fehler
+        pip.status_text = "⚠ Fehlgeschlagen: Keine Mediendateien."
+        db.session.commit()
+        return
 
-        # Den Audio-Clip auf das Video legen
-        final_clip = video_clip.set_audio(audio_clip)
+    # Beispiel‐Logik: alle VideoClips nacheinander zusammenfügen
+    clips = [VideoFileClip(v) for v in videos]
+    final_video = concatenate_videoclips(clips, method="compose")
 
-        # Als neue Datei speichern
-        final_clip.write_videofile(output_file, codec='libx264', audio_codec='aac', verbose=False, logger=None)
+    # Beispiel: nehmen die erste Audiodatei als Hintergrund‐Audio
+    audio_clip = AudioFileClip(audios[0])
+    final_video = final_video.set_audio(audio_clip)
 
-        print(f"[INFO] Video generiert: {output_file}")
-        return output_file
+    # Speichern unter output_videos/<pipeline_id>.mp4
+    output_path = os.path.join(OUTPUT_DIR, f"{pipeline_id}.mp4")
+    final_video.write_videofile(output_path, fps=24)
 
-    except Exception as e:
-        print(f"[ERROR] Beim Generieren des Videos ist ein Fehler aufgetreten: {e}")
-        return None
+    # Status‐Update
+    pip.video_path = output_path
+    pip.status_text = "✔ Fertig: Video erzeugt."
+    db.session.commit()
