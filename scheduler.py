@@ -29,7 +29,7 @@ def schedule_all_jobs(app):
     scheduler.start()
 
 def run_pipeline(pipeline_id):
-    from models import db, Pipeline
+    from models import Pipeline
     pipe = Pipeline.query.get(pipeline_id)
     if not pipe or not pipe.active:
         return
