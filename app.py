@@ -1,20 +1,16 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from models import db
-from routes import main as main_blueprint
+from routes import main
 
 app = Flask(__name__)
-
-# Datenbank-Konfiguration (lokal oder bei Render)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialisiere Datenbank
-db.init_app(app)
+db = SQLAlchemy(app)
 
-# Registriere Blueprint (aus routes.py)
-app.register_blueprint(main_blueprint)
+# Blueprints registrieren
+app.register_blueprint(main)
 
-# Stelle sicher, dass das App-Objekt existiert für gunicorn
-if __name__ == "__main__":
-    app.run(debug=True)
+# Datenbanktabellen erstellen (falls nicht vorhanden)
+with app.app_context():
+    db.create_all()
