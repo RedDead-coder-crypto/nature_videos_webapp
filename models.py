@@ -7,5 +7,5 @@ class Pipeline(db.Model):
     name = db.Column(db.String(100), nullable=False)
     video_path = db.Column(db.String(200))
     youtube_url = db.Column(db.String(200))
-    status_text = db.Column(db.String(255), default="Wartend")
-    started_at = db.Column(db.DateTime, nullable=True)
+    status_text = db.Column(db.String(100))
+    started_at = db.Column(db.DateTime)
