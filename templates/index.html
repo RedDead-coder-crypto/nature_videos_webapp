@@ -1,19 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Video Pipelines</title>
+    <meta charset="utf-8">
+    <title>Video-Pipelines</title>
 </head>
 <body>
     <h1>Vorhandene Pipelines</h1>
+
     <ul>
         {% for pipeline in pipelines %}
-            <li>{{ pipeline.name }} – {{ pipeline.status_text }} – {{ pipeline.started_at }}</li>
+            <li>
+                <strong>{{ pipeline.name }}</strong> –
+                {{ pipeline.status_text }}{% if pipeline.started_at %} –
+                gestartet am {{ pipeline.started_at }}{% endif %}
+            </li>
         {% endfor %}
     </ul>
 
     <h2>Neue Pipeline anlegen</h2>
     <form action="{{ url_for('main.create') }}" method="post">
-        <input type="text" name="name" placeholder="Pipeline Name" required>
+        <input type="text" name="name" placeholder="Name der Pipeline" required>
         <button type="submit">Erstellen</button>
     </form>
 </body>
