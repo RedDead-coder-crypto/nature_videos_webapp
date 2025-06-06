@@ -19,3 +19,14 @@ if __name__ == "__main__":
         db.create_all()
         print("✅ Datenbank wurde initialisiert.")
     app.run(debug=True)
+# ganz oben
+from flask import Blueprint
+from models import db
+
+main = Blueprint('main', __name__)
+
+# Diese neue Route fügt die Tabelle hinzu!
+@main.route('/init-db')
+def init_db():
+    db.create_all()
+    return "Database initialized"
