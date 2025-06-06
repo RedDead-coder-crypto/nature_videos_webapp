@@ -34,6 +34,7 @@
   {% if pip.video_path %}
     <h2>Generiertes Video</h2>
     <video controls>
+      <!-- pip.video_path ist "static/media/videos/pipeline_<id>.mp4" -->
       <source src="{{ url_for('static', filename=pip.video_path.replace('static/', '')) }}" type="video/mp4">
       Dein Browser unterstützt dieses Videoformat nicht.
     </video>
