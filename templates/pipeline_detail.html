@@ -1,15 +1,23 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>Pipeline-Detail</title>
-</head>
+<head><meta charset="utf-8"><title>Pipeline-Detail</title></head>
 <body>
   <h1>Pipeline: {{ pipeline.name }}</h1>
   <p><strong>Status:</strong> {{ pipeline.status_text or 'unbekannt' }}</p>
   <p><strong>Gestartet am:</strong> {{ pipeline.started_at or 'noch nicht gestartet' }}</p>
-  <p><strong>Video-Pfad:</strong> {{ pipeline.video_path or '–' }}</p>
-  <p><strong>YouTube-URL:</strong> {{ pipeline.youtube_url or '–' }}</p>
+
+  {% if pipeline.video_path %}
+    <p>
+      <strong>Video generiert:</strong><br>
+      <video width="320" height="240" controls>
+        <source src="{{ pipeline.video_path }}" type="video/mp4">
+        Dein Browser unterstützt das Video-Tag nicht.
+      </video>
+      <br>
+      (Lade es herunter: <a href="{{ pipeline.video_path }}" download>Download MP4</a>)
+    </p>
+  {% endif %}
+
   <hr>
   <a href="{{ url_for('main.index') }}">← Zurück zur Übersicht</a>
 </body>
