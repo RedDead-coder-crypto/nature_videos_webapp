@@ -1,12 +1,20 @@
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from models import db
+from routes import main as main_blueprint
 
-db = SQLAlchemy()
+app = Flask(__name__)
 
-class Pipeline(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    video_path = db.Column(db.String(200))
-    youtube_url = db.Column(db.String(200))
-    status_text = db.Column(db.String(255), default="Wartend")
-    started_at = db.Column(db.DateTime, nullable=True)
+# Datenbank-Konfiguration (lokal oder bei Render)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialisiere Datenbank
+db.init_app(app)
+
+# Registriere Blueprint (aus routes.py)
+app.register_blueprint(main_blueprint)
+
+# Stelle sicher, dass das App-Objekt existiert für gunicorn
+if __name__ == "__main__":
+    app.run(debug=True)
