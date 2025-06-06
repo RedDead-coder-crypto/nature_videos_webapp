@@ -1,26 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>Video-Pipelines</title>
+  <meta charset="utf-8">
+  <title>Pipelines</title>
 </head>
 <body>
-    <h1>Vorhandene Pipelines</h1>
+  <h1>Vorhandene Pipelines</h1>
 
+  {% if pipelines %}
     <ul>
-        {% for pipeline in pipelines %}
-            <li>
-                <strong>{{ pipeline.name }}</strong> –
-                {{ pipeline.status_text }}{% if pipeline.started_at %} –
-                gestartet am {{ pipeline.started_at }}{% endif %}
-            </li>
-        {% endfor %}
+      {% for pipeline in pipelines %}
+        <li>
+          <strong>{{ pipeline.name }}</strong> – {{ pipeline.status_text or 'N/A' }}
+          <!-- Hier muss das Formular mit POST an run_pipeline stehen: -->
+          <form action="{{ url_for('main.run_pipeline', pipeline_id=pipeline.id) }}"
+                method="post"
+                style="display:inline">
+            <button type="submit">▶️ Ausführen</button>
+          </form>
+        </li>
+      {% endfor %}
     </ul>
+  {% else %}
+    <p>Keine Pipelines vorhanden.</p>
+  {% endif %}
 
-    <h2>Neue Pipeline anlegen</h2>
-    <form action="{{ url_for('main.create') }}" method="post">
-        <input type="text" name="name" placeholder="Name der Pipeline" required>
-        <button type="submit">Erstellen</button>
-    </form>
+  <hr>
+
+  <h2>Neue Pipeline erstellen</h2>
+  <form action="{{ url_for('main.create') }}" method="post">
+    <input type="text" name="name" placeholder="Name der Pipeline" required>
+    <button type="submit">Erstellen</button>
+  </form>
 </body>
 </html>
