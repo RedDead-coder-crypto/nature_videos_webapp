@@ -32,3 +32,12 @@ def run_pipeline(pipeline_id):
     pipeline = Pipeline.query.get(pipeline_id)
     upload_to_youtube(pipeline.video_path, pipeline_id)
     return redirect(url_for('main.pipeline_detail', pipeline_id=pipeline_id))
+from flask import Blueprint
+from models import db
+
+main = Blueprint("main", __name__)
+
+@main.route("/init-db")
+def init_db():
+    db.create_all()
+    return "✅ Datenbank erstellt!"
