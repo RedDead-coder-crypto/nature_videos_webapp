@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <title>Pipeline: {{ pipeline.name }}</title>
+</head>
+<body>
+    <h1>Pipeline: {{ pipeline.name }}</h1>
+    <p>Status: {{ pipeline.status_text }}</p>
+    <p>Gestartet am: {{ pipeline.started_at }}</p>
+
+    {% if pipeline.video_path %}
+        <p>Video gespeichert unter: {{ pipeline.video_path }}</p>
+        <video width="480" height="270" controls>
+            <source src="/{{ pipeline.video_path }}" type="video/mp4" />
+            Ihr Browser unterstützt das Video‐Tag nicht.
+        </video>
+    {% else %}
+        <form method="post" action="{{ url_for('main.run_pipeline', pipe_id=pipeline.id) }}">
+            <button type="submit">Pipeline ausführen</button>
+        </form>
+    {% endif %}
+
+    <hr>
+    <a href="{{ url_for('main.index') }}">← Zurück zur Übersicht</a>
+</body>
+</html>
