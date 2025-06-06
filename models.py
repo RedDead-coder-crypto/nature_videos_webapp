@@ -1,8 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-
-# db-Instanz wird durch app.py initialisiert
-db = SQLAlchemy()
+from app import db
 
 class Pipeline(db.Model):
     __tablename__ = 'pipeline'
