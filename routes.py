@@ -10,7 +10,7 @@ main = Blueprint('main', __name__)
 @main.route('/init-db', methods=['GET'])
 def init_db():
     """
-    Lädt einmalig die Datenbank und Tabelle 'pipeline'
+    Lädt einmalig die Datenbank und Tabelle 'pipeline'.
     """
     db.create_all()
     return "✅ Datenbank und Tabelle 'pipeline' wurden erstellt!"
@@ -29,14 +29,14 @@ def index():
             db.session.commit()
         return redirect(url_for('main.index'))
 
-    # Wenn hierher per GET navigiert wird:
+    # wenn GET: alle Pipelines auslesen und Template rendern
     pipelines = Pipeline.query.order_by(Pipeline.id.desc()).all()
     return render_template('index.html', pipelines=pipelines)
 
 @main.route('/pipeline/<int:pipe_id>')
 def show_pipeline(pipe_id):
     """
-    Zeigt Detailseite für eine einzelne Pipeline
+    Zeigt Detailseite für eine einzelne Pipeline.
     """
     pip = Pipeline.query.get_or_404(pipe_id)
     return render_template('show_pipeline.html', pip=pip)
@@ -44,7 +44,7 @@ def show_pipeline(pipe_id):
 @main.route('/create', methods=['POST'])
 def create_pipeline():
     """
-    Wird ausgelöst, wenn im Formular auf 'Erstellen' geklickt wird.
+    Wird ausgelöst, wenn im Formular auf "Erstellen" geklickt wird.
     Leitet zurück auf '/'
     """
     name = request.form.get('name', '').strip()
