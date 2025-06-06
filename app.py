@@ -1,22 +1,25 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from routes import main
+from models import db, Pipeline  # Importiere SQLAlchemy-Instanz und Modell
+from routes import main          # Importiere das Blueprint mit allen Routen
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pipelines.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+def create_app():
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pipelines.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
+    # Binde SQLAlchemy an die App
+    db.init_app(app)
 
-# Importiere das Modell, damit SQLAlchemy weiß, welche Tabellen es anlegen soll
-from models import Pipeline
+    # Registriere das Blueprint
+    app.register_blueprint(main)
 
-# Registriere den Blueprint für alle Routen
-app.register_blueprint(main)
+    # Erzeuge beim Start sicher alle Tabellen, falls sie fehlen
+    with app.app_context():
+        db.create_all()
 
-# Lege beim Start alle noch fehlenden Tabellen an
-with app.app_context():
-    db.create_all()
+    return app
+
+app = create_app()
 
 if __name__ == '__main__':
     app.run(debug=True)
