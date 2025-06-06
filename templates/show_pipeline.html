@@ -1,36 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-    <meta charset="utf-8">
-    <title>Pipeline: {{ pip.name }}</title>
+  <meta charset="utf-8">
+  <title>Pipeline {{ pip.id }} – {{ pip.name }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 1rem; }
+    h1 { margin-bottom: 0.5rem; }
+    .info { margin-bottom: 1rem; }
+    .button {
+      display: inline-block; padding: 0.3rem 0.6rem;
+      background: #28a745; color: white; text-decoration: none; border-radius: 4px;
+    }
+    .button:hover { background: #218838; }
+    video { display: block; margin-top: 1rem; max-width: 100%; height: auto; }
+  </style>
 </head>
 <body>
-    <h1>Pipeline: {{ pip.name }}</h1>
+  <h1>Pipeline {{ pip.id }} – {{ pip.name }}</h1>
 
-    <!-- Zeigt den aktuellen Status an -->
-    <p><strong>Status:</strong> {{ pip.status_text }}</p>
+  <div class="info">
+    <strong>Status:</strong> {{ pip.status_text }}<br>
     {% if pip.started_at %}
-        <p><strong>Gestartet am:</strong> {{ pip.started_at }}</p>
+      <strong>Gestartet am:</strong> {{ pip.started_at.strftime('%Y-%m-%d %H:%M:%S') }} (UTC)<br>
     {% endif %}
+  </div>
 
-    <!-- Wenn bereits ein Video erzeugt wurde, Link anzeigen -->
-    {% if pip.video_path %}
-        <p><strong>Videodatei:</strong> <a href="{{ url_for('static', filename=pip.video_path) }}" target="_blank">{{ pip.video_path }}</a></p>
-    {% endif %}
-
-    <!-- Wenn bereits ein YouTube-Link existiert, anzeigen -->
-    {% if pip.youtube_url %}
-        <p><strong>YouTube-URL:</strong> <a href="{{ pip.youtube_url }}" target="_blank">{{ pip.youtube_url }}</a></p>
-    {% endif %}
-
-    <hr>
-
-    <!-- Formular, um die Pipeline zu starten -->
+  {% if pip.status_text == 'Wartend …' %}
     <form action="{{ url_for('main.run_pipeline', pipe_id=pip.id) }}" method="post">
-        <button type="submit">Ausführen</button>
+      <button type="submit" class="button">Pipeline ausführen</button>
     </form>
+  {% endif %}
 
-    <br>
-    <a href="{{ url_for('main.index') }}">← Zurück zur Übersicht</a>
+  {% if pip.video_path %}
+    <h2>Generiertes Video</h2>
+    <video controls>
+      <source src="{{ url_for('static', filename=pip.video_path.replace('static/', '')) }}" type="video/mp4">
+      Dein Browser unterstützt dieses Videoformat nicht.
+    </video>
+  {% endif %}
+
+  {% if pip.youtube_url %}
+    <h2>YouTube-URL</h2>
+    <p><a href="{{ pip.youtube_url }}" target="_blank">{{ pip.youtube_url }}</a></p>
+  {% endif %}
+
+  <p><a href="{{ url_for('main.index') }}">← Zurück zur Übersicht</a></p>
 </body>
 </html>
