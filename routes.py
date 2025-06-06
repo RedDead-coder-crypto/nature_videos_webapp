@@ -1,57 +1,59 @@
 from flask import Blueprint, render_template, request, redirect, url_for
-from models import db, Pipeline
 from datetime import datetime
-import os
-
-# Importiere den Generator
+from models import db, Pipeline
 from video_generator import generate_nature_video
 
 main = Blueprint('main', __name__)
 
-@main.route('/')
+@main.route('/', methods=['GET', 'POST'])
 def index():
-    pipelines = Pipeline.query.all()
+    """
+    GET  /            → zeigt eine Liste aller Pipelines + Formular zum Anlegen
+    POST /            → legt eine neue Pipeline an und leitet zurück zu GET /
+    """
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        if name:
+            new_pipe = Pipeline(name=name, status_text="⏳ Wartend...")
+            db.session.add(new_pipe)
+            db.session.commit()
+        return redirect(url_for('main.index'))
+
+    # beim GET: wir holen alle Pipelines aus der DB und zeigen sie im Template
+    pipelines = Pipeline.query.order_by(Pipeline.id.desc()).all()
     return render_template('index.html', pipelines=pipelines)
 
-@main.route('/create', methods=['POST'])
-def create():
-    name = request.form.get('name', 'Pipeline ohne Namen')
-    new_pipeline = Pipeline(name=name, status_text='Wartend', started_at=None)
-    db.session.add(new_pipeline)
-    db.session.commit()
-    return redirect(url_for('main.index'))
 
-@main.route('/pipeline/<int:pipeline_id>')
-def pipeline_detail(pipeline_id):
-    pipeline = Pipeline.query.get_or_404(pipeline_id)
-    return render_template('pipeline_detail.html', pipeline=pipeline)
-
-@main.route('/pipeline/<int:pipeline_id>/run', methods=['POST'])
-def run_pipeline(pipeline_id):
-    pipeline = Pipeline.query.get_or_404(pipeline_id)
-
-    # 1. Status auf „Video wird erstellt“ setzen
-    pipeline.status_text = "🎬 Video wird erstellt…"
-    pipeline.started_at = datetime.utcnow()
-    db.session.commit()
-
-    # 2. Video generieren
-    video_path = generate_nature_video(pipeline_id)
-    if not video_path:
-        # Fehlermeldung in Status schreiben
-        pipeline.status_text = "⚠️ Fehlgeschlagen: Keine Mediendateien."
-        db.session.commit()
-        return redirect(url_for('main.pipeline_detail', pipeline_id=pipeline_id))
-
-    # 3. Video-Pfad in der Datenbank speichern
-    pipeline.video_path = video_path
-    pipeline.status_text = "✅ Rendering abgeschlossen"
-    db.session.commit()
-
-    # Hinweis: YouTube-Upload kommt später – hier beenden wir erst einmal
-    return redirect(url_for('main.pipeline_detail', pipeline_id=pipeline_id))
-
-@main.route('/init-db')
+@main.route('/init-db', methods=['GET'])
 def init_db():
+    """
+    Einmaliger Aufruf → erstellt die Datenbanktabellen (db.create_all()) 
+    und zeigt eine kurze Bestätigung.
+    """
     db.create_all()
     return "✅ Datenbank und Tabelle 'pipeline' wurden erstellt!"
+
+
+@main.route('/pipeline/<int:pipe_id>', methods=['GET'])
+def show_pipeline(pipe_id):
+    """
+    GET /pipeline/<id>  → zeigt Name, Status, Startzeit, Video‐Pfad (falls fertig)
+    """
+    pip = Pipeline.query.get_or_404(pipe_id)
+    return render_template('show_pipeline.html', pipeline=pip)
+
+
+@main.route('/pipeline/<int:pipe_id>/run', methods=['POST'])
+def run_pipeline(pipe_id):
+    """
+    POST /pipeline/<id>/run → startet die Video‐Generierung (synchron oder asynchron).
+    In diesem Beispiel direkt synchron (blockierend); 
+    in Produktion würdet ihr das in einen Hintergrund‐Worker packen.
+    """
+    pip = Pipeline.query.get_or_404(pipe_id)
+    if pip.status_text.startswith("⏳"):
+        # Wir verhindern doppeltes Ausführen
+        pip.status_text = "⏳ Wird gerade verarbeitet..."
+        db.session.commit()
+        generate_nature_video(pipe_id)
+    return redirect(url_for('main.show_pipeline', pipe_id=pipe_id))
