@@ -1,23 +1,25 @@
-import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from routes import main as main_blueprint
-from models import db
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# SQLAlchemy-Instanz, die in models.py importiert wird
+db = SQLAlchemy()
 
-# SQLAlchemy an Flask binden
-db.init_app(app)
+def create_app():
+    app = Flask(__name__)
+    # Pfad zur SQLite-Datenbank im Projektverzeichnis
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Blueprint registrieren
-app.register_blueprint(main_blueprint)
+    # SQLAlchemy konfigurieren
+    db.init_app(app)
 
-# Tabelle anlegen, falls sie noch nicht existiert
-with app.app_context():
-    db.create_all()
+    # Blueprint mit allen Routen registrieren
+    from routes import main
+    app.register_blueprint(main)
+
+    return app
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    # Zum lokalen Start: python app.py
+    app = create_app()
+    app.run(host='0.0.0.0', port=5000, debug=True)
