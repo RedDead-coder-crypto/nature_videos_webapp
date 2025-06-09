@@ -2,12 +2,13 @@ import os
 import threading
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for
-from models import db, Pipeline
+from app import db
+from models import Pipeline
 from video_generator import generate_nature_video
 
 main = Blueprint('main', __name__)
 
-# Wo die Videos abgelegt werden
+# Speicherort für Videos
 VIDEO_FOLDER = os.path.join('static', 'media', 'videos')
 
 # Hintergrund-Thread für Videoerzeugung
@@ -17,13 +18,9 @@ def run_pipeline(pipeline_id):
     pipeline.started_at = datetime.utcnow()
     db.session.commit()
 
-    # Ordner anlegen, falls nicht vorhanden
     os.makedirs(VIDEO_FOLDER, exist_ok=True)
-
-    # Video erzeugen
     filename = generate_nature_video(pipeline_id, VIDEO_FOLDER)
 
-    # Datenbank aktualisieren
     pipeline.video_path = os.path.join(VIDEO_FOLDER, filename)
     pipeline.status_text = "Video erstellt ✓"
     db.session.commit()
@@ -32,18 +29,18 @@ def run_pipeline(pipeline_id):
 @main.route('/init-db')
 def init_db():
     db.create_all()
-    return "Datenbank (Tabelle „pipeline“) wurde angelegt."
+    return "Datenbank initialisiert."
 
 # Startseite mit Formular & Liste
-@main.route('/')
+@main.route('/', methods=['GET'])
 def index():
-    pipelines = Pipeline.query.all()
+    pipelines = Pipeline.query.order_by(Pipeline.id.desc()).all()
     return render_template('index.html', pipelines=pipelines)
 
 # Neue Pipeline anlegen
 @main.route('/create', methods=['POST'])
 def create():
-    name = request.form['name']
+    name = request.form.get('name', 'Neue Pipeline')
     pipeline = Pipeline(name=name)
     db.session.add(pipeline)
     db.session.commit()
