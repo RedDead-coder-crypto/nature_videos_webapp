@@ -9,7 +9,6 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # Extension an die App koppeln
     db.init_app(app)
 
     # Blueprint-Registration
