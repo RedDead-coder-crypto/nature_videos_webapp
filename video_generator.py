@@ -1,7 +1,7 @@
 import os
 from moviepy.editor import ColorClip
 
-# Erzeugt ein Dummy-Video (schwarzer Bildschirm)
+# Erzeugt ein Dummy-Video (schwarzes Bild über Dauer)
 def generate_nature_video(pipeline_id, output_folder):
     duration = 5  # Sekunden
     fps = 24
